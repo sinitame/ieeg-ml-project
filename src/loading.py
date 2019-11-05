@@ -108,6 +108,7 @@ def load_patient_seizures(data_path, patient_id, all_seizures=False):
     Function that loads patient informations and relevant data (iEEG during a seizure).
     If data is not in the data directory, data is downloaded on the ETH iEEG database.
     
+    TODO: Propagate all_seizure boolean to all functions
     """
     
     patient_path = "ID{value:0>{width}}".format(value=patient_id, width=2)
