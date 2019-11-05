@@ -38,7 +38,7 @@ def download_patient_file(data_path, patient_id, file_name):
     
     
     
-def compute_files_of_seizures(patient_id, seizures_start,seizures_end):
+def compute_files_of_seizures(patient_id, seizures_start,seizures_end, all_seizures=False, delta = 0):
     """
     This function calculate in which file the seizure is occuring 
     depending on the start time and the end time in seconds given in
@@ -50,20 +50,28 @@ def compute_files_of_seizures(patient_id, seizures_start,seizures_end):
         - seizure_end: ending of the seizure inficated in s
     
     output:
-        - returns the list of the files containning seizure data
+        - returns the list of the files containning seizure data 
+        (+ previous and next hours if delta != 0)
+        
+    TODO : Check the min and max possible hours
     """
     
     prefix = "../data/"
     hours = []
     files = []
-    
+
+    if not all_seizures:
+        seizures_start = [seizures_start[0]]
+        seizures_end = [seizures_end[0]]
+
     for s_start, s_end in zip(seizures_start,seizures_end):
+        print("Start/end", s_start, s_end)
         seizure_start, seizure_end = s_start[0], s_end[0]
         #Get the hour of starting
-        start_hour = int(seizure_start/(60*60))+1 
+        start_hour = int(seizure_start/(60*60))+ 1 - delta
         #Get the hour of ending
-        end_hour = int(seizure_end/(60*60))+1 
-        h_range = np.arange(start_hour,end_hour+1, 1)
+        end_hour = int(seizure_end/(60*60)) + 1 + delta 
+        h_range = np.arange(start_hour,end_hour + 1, 1)
         hours.append(h_range)
         files.append([prefix + "ID{value:0>{width}}/ID{value:0>{width}}_{hour}h.mat".format(value=patient_id,width=2,hour=h) for h in h_range])
     
@@ -103,7 +111,7 @@ def compute_seizures_ranges(seizures_start,seizures_end,fs):
     
     return ranges 
 
-def load_patient_seizures(data_path, patient_id, all_seizures=False):
+def load_patient_seizures(data_path, patient_id, all_seizures=False, delta=0):
     """
     Function that loads patient informations and relevant data (iEEG during a seizure).
     If data is not in the data directory, data is downloaded on the ETH iEEG database.
@@ -142,7 +150,7 @@ def load_patient_seizures(data_path, patient_id, all_seizures=False):
     infos["sf"] = sf
     
     # Find the file of the seizure
-    hours, files = compute_files_of_seizures(patient_id, seizure_start,seizure_end)
+    hours, files = compute_files_of_seizures(patient_id, seizure_start, seizure_end, all_seizures, delta)
     ranges = compute_seizures_ranges(seizure_start,seizure_end,sf)
     
     print("EEG files: ", files)
@@ -153,18 +161,19 @@ def load_patient_seizures(data_path, patient_id, all_seizures=False):
     eegs = []
     
     if all_seizures:
-        files_to_download = [file for seizure_files in files for file in seizure_files]
+        seizures_files = files
     else:
-        files_to_download = files[0]
+        seizures_files = [files[0]]
 
-    for file_path in files_to_download:
-        if not os.path.exists(file_path):
-            file_name = os.path.basename(file_path)
-            print("\n{} file not found, need to download it".format(file_name))
-            download_patient_file(data_path, patient_id, file_name)
-        data = scipy.io.loadmat(file_path)
-        #df_data = pd.DataFrame(data['EEG'].T)
-        #eegs.append(df_data)
-        eegs.append(data['EEG'])
+    for seizure_files_to_download in seizures_files:
+        seizure_eegs = []
+        for file_path in seizure_files_to_download:
+            if not os.path.exists(file_path):
+                file_name = os.path.basename(file_path)
+                print("\n{} file not found, need to download it".format(file_name))
+                download_patient_file(data_path, patient_id, file_name)
+            data = scipy.io.loadmat(file_path)
+            seizure_eegs.append(data['EEG'])
+        eegs.append(seizure_eegs)
         
     return {"eegs":eegs, "ranges": ranges, "infos": infos}
