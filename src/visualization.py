@@ -45,3 +45,25 @@ def plot_multiple_signals(eegs, list_of_signals, seizure_ranges, plot_range, sei
     
     for i,signal in enumerate(list_of_signals):
         plot_signal_on_ax(axs[i], eegs[signal] , seizure_ranges, plot_range, seizure_id)
+        
+
+def plot_metrics(thresholds, false_alarms, delays, precision):
+    fig, axs =  plt.subplots(2, 2,figsize=(20, 10))
+    
+    axs[0,0].plot(false_alarms, thresholds)
+    axs[0,0].set_ylabel('Threshold')
+    axs[0,0].set_xlabel('False Alarm')
+    
+    for i in range(len(delays[0])):
+        axs[0,1].plot([pt[i] for pt in delays], thresholds, label = 'seizure %s'%i)
+    axs[0,1].set_ylabel('Threhold')
+    axs[0,1].set_xlabel('Delays')
+    
+    axs[1,0].plot(precision, thresholds)
+    axs[1,0].set_ylabel('Threshold')
+    axs[1,0].set_xlabel('Precision')
+    
+    for i in range(len(delays[0])):
+        axs[1,1].plot([pt[i] for pt in delays], false_alarms, label = 'seizure %s'%i)
+    axs[1,1].set_ylabel('False Alarm')
+    axs[1,1].set_xlabel('Delays')
