@@ -6,7 +6,7 @@ def top_signals(eegs, seizure_range, top=1, id_seizure = None):
     """
     
     sensors_power=[]
-    num_files_per_seizure = len(eegs)
+    num_files_per_seizure = len(eegs[0])
     seizure_file = num_files_per_seizure // 2
     
     if id_seizure:
