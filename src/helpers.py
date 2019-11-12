@@ -166,3 +166,17 @@ def convert_sample_ranges_to_window_ranges(ranges, win_size, step_size,n):
         end_window_range = int(end_range*(number_of_slices/n))
         window_ranges.append((start_window_range, end_window_range))
     return window_ranges
+
+def compute_score(threshold, false_alarm, precision, delay):
+
+    for seizure in range(len(delay[0])):
+        scores = np.array([1/(pt[seizure]/70+(fa/175000)) for pt,fa in zip(delay, false_alarm)])
+        max_score = np.max(scores)
+        index_max_score = np.argmax(scores)
+        best_threshold = threshold[index_max_score]
+
+        print("Max score first seizure {} for t={}".format(max_score, best_threshold))
+        print("FA:", false_alarm[index_max_score])
+        print("Delay:", delay[index_max_score][seizure])
+        print("Precision:", precision[index_max_score])
+        print()
