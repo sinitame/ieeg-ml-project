@@ -1,5 +1,6 @@
 import numpy as np
 from processing import calculate_signal_power
+from scipy.spatial import distance
 
 def top_signals(eegs, seizure_range, top=1, id_seizure = None):
     """
@@ -167,16 +168,66 @@ def convert_sample_ranges_to_window_ranges(ranges, win_size, step_size,n):
         window_ranges.append((start_window_range, end_window_range))
     return window_ranges
 
-def compute_score(threshold, false_alarm, precision, delay):
+def compute_score_on_seizures(threshold, false_alarm, precision, delay, weights, lambda_=0.00001, d_max=10):
+    all_scores = []
+    w1, w2, w3 = weights
+    
+    # Compute min and max values of false alarm rate and delay
+    min_false_alarm = min(false_alarm)
+    max_false_alarm = max(false_alarm)
+    
+    delay_list = list(zip(*delay))
+    min_delay = min([min(d) for d in delay_list])
+    max_delay = max([max(d) for d in delay_list])
+    
+    for seizure in range(len(delay_list)):
+        
+        # Normalize delay and false alarms
+        delays_i = np.array(delay_list[seizure])
 
-    for seizure in range(len(delay[0])):
-        scores = np.array([1/(pt[seizure]/70+(fa/175000)) for pt,fa in zip(delay, false_alarm)])
+        normalized_delays = (delays_i - min_delay) / (max_delay - min_delay)
+        normalized_false_alarms = (np.array(false_alarm) - min_false_alarm) / (max_false_alarm - min_false_alarm)
+        
+        # Compute score
+        scores = 1/(np.sqrt((w1*normalized_delays)**2 + (w2*normalized_false_alarms)**2 + 1/(w3*np.array(precision)**2) + lambda_))
+        
+        # Adding constrains
+        scores = np.where(np.array(delays_i)>d_max, 0, scores)
+        all_scores.append(scores)
+        
+        # Printing best score threshold and metrics
         max_score = np.max(scores)
         index_max_score = np.argmax(scores)
         best_threshold = threshold[index_max_score]
 
-        print("Max score first seizure {} for t={}".format(max_score, best_threshold))
+        print("Max score for seizure {} is {} for t={}".format(seizure, max_score, best_threshold))
         print("FA:", false_alarm[index_max_score])
         print("Delay:", delay[index_max_score][seizure])
         print("Precision:", precision[index_max_score])
         print()
+    return all_scores
+
+def compute_overall_score(threshold, scores):
+    seizure_scores = []
+    feature_overall_score = 0
+    
+    # Measure distances between points
+    for score in scores:
+        max_score = np.max(score)
+        index_max_score = np.argmax(score)
+        best_threshold = threshold[index_max_score]
+        seizure_scores.append((max_score, best_threshold))
+    
+    matrix_distances = distance.cdist(seizure_scores, seizure_scores, 'euclidean')
+    distance_score = np.triu(matrix_distances).sum()/matrix_distances.shape[0]
+    
+    # Compute seizures scores average
+    seizure_scores_values = [score[0] for score in seizure_scores]
+    n_values = len(seizure_scores_values)
+    seizures_overall_score = sum(seizure_scores_values)/n_values
+    
+    feature_overall_score = seizures_overall_score / distance_score
+    
+    print("Distance score", distance_score)
+    print("Averaged seizures score", seizures_overall_score)
+    print("Overall score", feature_overall_score)

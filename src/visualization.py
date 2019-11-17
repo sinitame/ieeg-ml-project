@@ -9,6 +9,8 @@ def plot_one_signal(data, seizure_ranges, plot_range, seizure_id = -1):
     start = max(int(seizure_ranges[0][0] - plot_range //2), 0)
     end = min(int(seizure_ranges[-1][1] + plot_range//2), 512*3600 - 1)
     time = np.arange(start,end,1)
+    print("time", len(time))
+    print("data", len(data))
     
     plt.figure(figsize=(20,10))
     plt.plot(time,data[start:end])
@@ -67,3 +69,10 @@ def plot_metrics(thresholds, false_alarms, delays, precision):
         axs[1,1].plot([pt[i] for pt in delays], false_alarms, label = 'seizure %s'%i)
     axs[1,1].set_ylabel('False Alarm')
     axs[1,1].set_xlabel('Delays')
+    
+def plot_scores(thresholds, scores):
+    plt.figure(figsize=(20,10))
+    for i,score in enumerate(scores):
+        plt.plot(thresholds,score, label = 'seizure {}'.format(i))
+    plt.legend()
+    plt.show()
