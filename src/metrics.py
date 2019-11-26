@@ -108,7 +108,7 @@ def calculate_precision(signal, indexes, threshold):
 
 
 def compute_metrics(data, ranges, win_size, step_size):
-    thresholds = np.arange(0,1,0.0001)
+    thresholds = np.arange(0,1,0.001)
     false_alarms = []
     delays = []
     precisions = []
