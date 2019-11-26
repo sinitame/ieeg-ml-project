@@ -34,7 +34,7 @@ def sliding_window(signal,winSize,step=1):
         yield np.array(signal[i:i+winSize])
 
 
-def calculate_feature(eegs, sensor, window_size, step_size, feature):
+def calculate_feature(eegs, window_size, step_size, feature, sensor=-1, seizure=-1):
     """
     This function apply a specific feature to a signal using windows.
     
@@ -61,12 +61,20 @@ def calculate_feature(eegs, sensor, window_size, step_size, feature):
     """
 
     energy_signals = []
-
+    
+    if seizure != -1:
+        eegs = [eegs[seizure]]
+        
     for seizure_eegs in eegs:
         seizure_energy_signals = []
 
         for eeg in seizure_eegs:
-            signal = eeg[sensor]
+
+            if sensor != -1:
+                signal = eeg[sensor]
+            else:
+                signal = eeg
+
             windows = sliding_window(signal, window_size, step_size)
 
             energy_signal = []
