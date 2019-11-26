@@ -231,3 +231,5 @@ def compute_overall_score(threshold, scores):
     print("Distance score", distance_score)
     print("Averaged seizures score", seizures_overall_score)
     print("Overall score", feature_overall_score)
+    
+    return feature_overall_score
