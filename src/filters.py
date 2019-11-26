@@ -23,9 +23,9 @@ def calculate_fir_filtered_signal(signal, f_min, f_max, fs, order=15):
     return filtered_signal
 
 
-def calculate_filtered_signal(eegs, sensor, f_min, f_max, ftype='fir',order=3, fs=512, seizure=-1):
+def calculate_filtered_signal(eegs, f_min, f_max, sensor=-1, order=3, ftype='fir', fs=512 , seizure=-1):
     """
-    This function apply a specific feature to a signal using windows.
+    This function filter the input data
     
     Parameters
     ----------
@@ -34,17 +34,17 @@ def calculate_filtered_signal(eegs, sensor, f_min, f_max, ftype='fir',order=3, f
         Each list of seizure data contains a list of array for one 
         or several hours of records for this seizure.
         Each list contains a list with the data of each sensors.
-    sensor : int
-        ID of the sensors we want to process
     f_min: int
         Min frequency cut
     f_max: int
         Max frequency cut
-    ftype: str
-        Type of filter ('fir' or 'butter')
+    sensor : int
+        ID of the sensors we want to process
     order: int
         Order for the filter
-    order: int
+    ftype: str
+        Type of filter ('fir' or 'butter')
+    fs: int
         Sampling frequency
     seizure: int
         Id of the seizure (default is all)
@@ -65,7 +65,11 @@ def calculate_filtered_signal(eegs, sensor, f_min, f_max, ftype='fir',order=3, f
         seizure_filtered_signals = []
 
         for eeg in seizure_eegs:
-            signal = eeg[sensor]
+
+            if sensor != -1:
+                signal = eeg[sensor]
+            else:
+                signal = eeg
 
             if ftype == 'fir':
                 filtered_signal = calculate_fir_filtered_signal(signal, f_min, f_max, fs, order=order)
