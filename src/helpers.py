@@ -193,13 +193,14 @@ def compute_score_on_seizures(threshold, false_alarm, precision, delay, weights,
         
         # Adding constrains
         scores = np.where(np.array(delays_i)>d_max, 0, scores)
-        all_scores.append(scores)
         
-        # Printing best score threshold and metrics
         max_score = np.max(scores)
         index_max_score = np.argmax(scores)
         best_threshold = threshold[index_max_score]
-
+        
+        all_scores.append((max_score, best_threshold))
+        
+        # Printing best score threshold and metrics
         print("Max score for seizure {} is {} for t={}".format(seizure, max_score, best_threshold))
         print("FA:", false_alarm[index_max_score])
         print("Delay:", delay[index_max_score][seizure])
@@ -207,16 +208,8 @@ def compute_score_on_seizures(threshold, false_alarm, precision, delay, weights,
         print()
     return all_scores
 
-def compute_overall_score(threshold, scores):
-    seizure_scores = []
+def compute_overall_score(seizure_scores):
     feature_overall_score = 0
-    
-    # Measure distances between points
-    for score in scores:
-        max_score = np.max(score)
-        index_max_score = np.argmax(score)
-        best_threshold = threshold[index_max_score]
-        seizure_scores.append((max_score, best_threshold))
     
     matrix_distances = distance.cdist(seizure_scores, seizure_scores, 'euclidean')
     distance_score = np.triu(matrix_distances).sum()/matrix_distances.shape[0]
