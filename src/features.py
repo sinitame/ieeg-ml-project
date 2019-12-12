@@ -1,5 +1,11 @@
 import numpy as np
 
+def calculate_min(signal):
+    return np.min(signal)
+
+def calculate_max(signal):
+    return np.max(signal)
+
 def calculate_energy(signal):
     return np.sum(np.power(signal,2))
 
@@ -10,6 +16,31 @@ def calculate_line_length(signal):
 def calculate_moving_avg(signal):
     n = len(signal)
     return np.sum(signal)/n
+
+def calculate_skewness(signal):
+    std = np.std(signal)
+    mean = np.mean(signal)
+    n = len(signal)
+    coeff = (n*(n-1))**0.5/(n*(n-2))
+    skewness = np.sum(np.power(signal-mean,3))/std**3
+    
+    return coeff * skewness
+
+def calculate_kurtosis(signal):
+    std = np.std(signal)
+    mean = np.mean(signal)
+    n = len(signal)
+    coeff = (n-1)/((n-2)*(n-3))
+    kurtosis = np.sum(np.power(signal-mean,4))/std**2
+    
+    return coeff*((n+1)*kurtosis + 6)
+
+def calculate_shannon_entropy(signal):
+    unique, counts = np.unique(signal, return_counts=True)
+    occurences = dict(zip(unique, counts))
+    n = len(unique)
+    frequencies = np.array([occurences[i] for i in signal])/n
+    return np.sum(frequencies*np.log(frequencies))
 
 def sliding_window(signal,winSize,step=1):
     """Returns a generator that will iterate through
