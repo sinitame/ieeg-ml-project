@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.signal as sig
 
 def calculate_min(signal):
     return np.min(signal)
@@ -40,6 +41,36 @@ def calculate_shannon_entropy(signal, base=None):
     n = len(signal)
     frequencies = counts/n
     return -np.sum(frequencies*np.log(frequencies))
+
+def calculate_lbp(signal):
+    n = len(signal)
+    middle_point = signal[n//2]
+    
+    signal = signal - middle_point
+    
+    # Thresholding
+    signal[signal>=0] = 1
+    signal[signal<0] = 0
+    
+    lbp = 0
+    for i, e in enumerate(signal):
+        if i != n//2:
+            lbp += e*2**i
+        
+    return lbp
+
+def calculate_phase_synchrony(y1,y2):
+    sig1_hill=sig.hilbert(y1)
+    sig2_hill=sig.hilbert(y2)
+    phase_y1=np.unwrap(np.angle(sig1_hill))
+    phase_y2=np.unwrap(np.angle(sig2_hill))
+    inst_phase_diff=phase_y1-phase_y2
+    n = len(inst_phase_diff)
+    
+    sin_sum = np.sum(np.sin(inst_phase_diff))
+    cos_sum = np.sum(np.cos(inst_phase_diff))
+    
+    return (1/n)*np.sqrt(np.power(sin_sum,2) + np.power(cos_sum,2))
 
 def sliding_window(signal,winSize,step=1):
     """Returns a generator that will iterate through
