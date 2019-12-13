@@ -76,3 +76,18 @@ def plot_scores(thresholds, scores):
         plt.plot(thresholds,score, label = 'seizure {}'.format(i))
     plt.legend()
     plt.show()
+    
+def plot_feature(signal, feature, start, end, scale=True):
+    
+    if scale:
+        normalization_term = np.max(np.abs(signal))/np.max(np.abs(feature))
+    else:
+        normalization_term = 1
+
+    sub_signal = np.array(signal[start:end+1])
+    sub_feature = np.array(feature[start:end+1])
+
+    plt.figure(figsize=(20,10))
+    plt.plot(sub_signal)
+    plt.plot(sub_feature*normalization_term)
+    plt.show()
