@@ -35,12 +35,11 @@ def calculate_kurtosis(signal):
     
     return coeff*((n+1)*kurtosis + 6)
 
-def calculate_shannon_entropy(signal):
+def calculate_shannon_entropy(signal, base=None):
     unique, counts = np.unique(signal, return_counts=True)
-    occurences = dict(zip(unique, counts))
-    n = len(unique)
-    frequencies = np.array([occurences[i] for i in signal])/n
-    return np.sum(frequencies*np.log(frequencies))
+    n = len(signal)
+    frequencies = counts/n
+    return -np.sum(frequencies*np.log(frequencies))
 
 def sliding_window(signal,winSize,step=1):
     """Returns a generator that will iterate through
