@@ -96,27 +96,27 @@ def merge_all_data(data, window_ranges):
             - A list of the updated window ranges for each seizure with an offset resulting from the merge.
     
     """
-    all_energy_signals = []
+    all_records = []
     new_indexes = []
     number_of_seizures = len(data)
     
-    for i,seizure_signals in enumerate(data):
-        merged_seizure_signals = []
+    for i,seizure_records in enumerate(data):
+        merged_seizure_records = []
         
         #Calculate index of seizure (always the middle table of data)
-        number_of_files = len(seizure_signals)
+        number_of_files = len(seizure_records)
         index_seizure = number_of_files//2
         
         # Calculate the new index position ofter merge
-        n = len(seizure_signals[0])
+        n = len(seizure_records[0])
         offset = index_seizure * n + i * n * number_of_files
         new_indexes.append((window_ranges[i][0] + offset , window_ranges[i][1] + offset ))
         
-        for energy_signal in seizure_signals:
-            merged_seizure_signals += energy_signal
+        for record in seizure_records:
+            merged_seizure_records += record
 
-        all_energy_signals += merged_seizure_signals
-    return new_indexes, all_energy_signals
+        all_records += merged_seizure_records
+    return new_indexes, all_records
 
 
 def scale_signal(signal, win_size, step_size):
@@ -130,6 +130,18 @@ def scale_signal(signal, win_size, step_size):
         scaled_signal += [point]*step_size
     
     return scaled_signal
+
+def scale_signal_all_data(data, win_size, step_size):
+    """
+    This function scales the processed data (using windows) 
+    to fit the dimension of the input signal.
+    """
+    
+    for seizure_records in data:
+        for i in range(len(seizure_records)):
+            seizure_records[i] = scale_signal(seizure_records[i], win_size, step_size)
+
+    return data
 
 def convert_to_seconds(index_value, win_size, step_size, n=1843200, fs=512.0):
     """
