@@ -95,7 +95,7 @@ def sliding_window(signal,winSize,step=1):
         yield np.array(signal[i:i+winSize])
 
 
-def calculate_feature(eegs, window_size, step_size, feature, sensor=-1, seizure=-1):
+def calculate_feature(eegs, window_size, step_size, feature, sensor1=-1, sensor2=-1, seizure=-1):
     """
     This function apply a specific feature to a signal using windows.
     
@@ -121,28 +121,39 @@ def calculate_feature(eegs, window_size, step_size, feature, sensor=-1, seizure=
         the computed features of the signals.
     """
 
-    energy_signals = []
+    feature_signals = []
+    signal2=None
     
     if seizure != -1:
         eegs = [eegs[seizure]]
         
     for seizure_eegs in eegs:
-        seizure_energy_signals = []
+        seizure_feature_signals = []
 
         for eeg in seizure_eegs:
 
-            if sensor != -1:
-                signal = eeg[sensor]
+            if sensor1 != -1:
+                signal1 = eeg[sensor1]
             else:
-                signal = eeg
+                signal1 = eeg
+                
+            if sensor2 != -1:
+                signal2 = eeg[sensor2]
 
-            windows = sliding_window(signal, window_size, step_size)
+            windows1 = sliding_window(signal1, window_size, step_size)
+            
+            if sensor2 != -1:
+                windows2 = sliding_window(signal2, window_size, step_size)
 
-            energy_signal = []
-            for window in windows:
-                energy_signal.append(feature(window))
+            feature_signal = []
+            if sensor2 != -1:
+                for window1, window2 in zip(windows1,windows2):
+                        feature_signal.append(feature(window1, window2))
+            else:
+                for window1 in windows1:
+                    feature_signal.append(feature(window1))
 
-            seizure_energy_signals.append(energy_signal)
-        energy_signals.append(seizure_energy_signals)
+            seizure_feature_signals.append(feature_signal)
+        feature_signals.append(seizure_feature_signals)
 
-    return energy_signals
+    return feature_signals
