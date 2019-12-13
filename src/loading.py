@@ -15,26 +15,32 @@ class DownloadProgressBar(tqdm):
 
 
 
-def download_patient_file(data_path, patient_id, file_name):
+def download_patient_file(data_path, patient_id, file_name, verbose=False):
     
     
     database_url = "http://ieeg-swez.ethz.ch/long-term_dataset/"
     patient_path = "ID{value:0>{width}}".format(value=patient_id, width=2)
     
     file_url = os.path.join(database_url, patient_path, file_name)
+    
+    if verbose:
+        print("\tCreating patient directory")
 
-    print("\tCreating patient directory")
     patient_dir = os.path.join(data_path, patient_path)
     os.makedirs(patient_dir, exist_ok=True)
-    print("\tDirectory: ", patient_dir)
+    
+    if verbose:
+        print("\tDirectory: ", patient_dir)
+        print('\tBeginning file download with urllib2...')
+        print("\tFile: ", file_url)
 
-    print('\tBeginning file download with urllib2...')
-    print("\tFile: ", file_url)
     save_name = os.path.join(patient_dir, file_name)
     with DownloadProgressBar(unit='B', unit_scale=True,
                              miniters=1, desc=file_url.split('/')[-1]) as t:
         urllib.request.urlretrieve(file_url, filename=save_name, reporthook=t.update_to)
-    print("File downloaded, saved at: ", save_name)
+    
+    if verbose:
+        print("File downloaded, saved at: ", save_name)
     
     
     
@@ -65,7 +71,6 @@ def compute_files_of_seizures(patient_id, seizures_start,seizures_end, all_seizu
         seizures_end = [seizures_end[0]]
 
     for s_start, s_end in zip(seizures_start,seizures_end):
-        print("Start/end", s_start, s_end)
         seizure_start, seizure_end = s_start[0], s_end[0]
         #Get the hour of starting
         start_hour = int(seizure_start/(60*60))+ 1 - delta
@@ -111,7 +116,7 @@ def compute_seizures_ranges(seizures_start,seizures_end,fs):
     
     return ranges 
 
-def load_patient_seizures(data_path, patient_id, all_seizures=False, delta=0):
+def load_patient_seizures(data_path, patient_id, all_seizures=False, delta=0, verbose=False):
     """
     Function that loads patient informations and relevant data (iEEG during a seizure).
     If data is not in the data directory, data is downloaded on the ETH iEEG database.
@@ -140,11 +145,6 @@ def load_patient_seizures(data_path, patient_id, all_seizures=False, delta=0):
     seizure_end = data_infos['seizure_end']
     sf = data_infos['fs'][0][0]
     
-    print("Seizure starts (s): ", seizure_start)
-    print("Seizure ends (s): ", seizure_end)
-    print("Duration (s): ", seizure_end-seizure_start)
-    print("Sampled frequency (Hz): ", sf)
-    
     infos["seizure_start"] = seizure_start
     infos["seizure_end"] = seizure_end
     infos["sf"] = sf
@@ -153,9 +153,14 @@ def load_patient_seizures(data_path, patient_id, all_seizures=False, delta=0):
     hours, files = compute_files_of_seizures(patient_id, seizure_start, seizure_end, all_seizures, delta)
     ranges = compute_seizures_ranges(seizure_start,seizure_end,sf)
     
-    print("EEG files: ", files)
-    print("Hour of seizure: ", hours)
-    print("Samples ranges: ", ranges)
+    if verbose:
+        print("Seizure starts (s): ", seizure_start)
+        print("Seizure ends (s): ", seizure_end)
+        print("Duration (s): ", seizure_end-seizure_start)
+        print("Sampled frequency (Hz): ", sf)
+        print("EEG files: ", files)
+        print("Hour of seizure: ", hours)
+        print("Samples ranges: ", ranges)
     
     # Load seizure data
     eegs = []
@@ -171,7 +176,7 @@ def load_patient_seizures(data_path, patient_id, all_seizures=False, delta=0):
             if not os.path.exists(file_path):
                 file_name = os.path.basename(file_path)
                 print("\n{} file not found, need to download it".format(file_name))
-                download_patient_file(data_path, patient_id, file_name)
+                download_patient_file(data_path, patient_id, file_name, verbose)
             data = scipy.io.loadmat(file_path)
             seizure_eegs.append(data['EEG'])
         eegs.append(seizure_eegs)
