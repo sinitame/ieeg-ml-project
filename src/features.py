@@ -1,4 +1,5 @@
 import numpy as np
+from collections import defaultdict
 import scipy.signal as sig
 
 def calculate_min(signal):
@@ -31,10 +32,10 @@ def calculate_kurtosis(signal):
     std = np.std(signal)
     mean = np.mean(signal)
     n = len(signal)
-    coeff = (n-1)/((n-2)*(n-3))
+    coeff1 = (n*(n+1))/((n-1)*(n-2)*(n-3))
+    coeff2 = (n-1)**2/((n-2)*(n-3))
     kurtosis = np.sum(np.power(signal-mean,4))/std**2
-    
-    return coeff*((n+1)*kurtosis + 6)
+    return coeff1*kurtosis - coeff2*3
 
 def calculate_shannon_entropy(signal, base=None):
     unique, counts = np.unique(signal, return_counts=True)
@@ -71,6 +72,65 @@ def calculate_phase_synchrony(y1,y2):
     cos_sum = np.sum(np.cos(inst_phase_diff))
     
     return (1/n)*np.sqrt(np.power(sin_sum,2) + np.power(cos_sum,2))
+
+def calculate_lbp(signal1, signal2):
+    n_size = 9
+    neighbourhoods1 = sliding_window(signal1,n_size,4)
+    neighbourhoods2 = sliding_window(signal2,n_size,4)
+    histogram1 = defaultdict(int)
+    histogram2 = defaultdict(int)
+    
+    #Compute histogram of first signal
+    for neighbours1 in neighbourhoods1:
+        middle_point = neighbours1[n_size//2]
+        neighbours1 = neighbours1 - middle_point
+
+        # Thresholding
+        neighbours1[neighbours1>=0] = 1
+        neighbours1[neighbours1<0] = 0
+
+        lbp = 0
+        for i, e in enumerate(neighbours1):
+            if i != n_size//2:
+                lbp += e*2**i
+                
+        if np.sum(np.abs(neighbours1[1:]-neighbours1[:-1])) <= 2:
+            histogram1[lbp] += 1
+        else:
+            histogram1[-1] += 1
+    
+    #Compute histogram of second signal
+    for neighbours2 in neighbourhoods2:
+        middle_point = neighbours2[n_size//2]
+        neighbours2 = neighbours2 - middle_point
+
+        # Thresholding
+        neighbours2[neighbours2>=0] = 1
+        neighbours2[neighbours2<0] = 0
+
+        lbp = 0
+        for i, e in enumerate(neighbours2):
+            if i < n_size//2:
+                lbp += e*2**i
+            if i > n_size//2:
+                lbp += e*2**(i-1)
+
+        if np.sum(np.abs(neighbours2[1:]-neighbours2[:-1])) <= 2:
+            histogram2[lbp] += 1
+        else:
+            histogram2[-1] += 1
+
+    dkl_1 = 0.000001
+    dkl_2 = 0.000001
+    
+    for k in histogram1.keys():
+        dkl_1 += histogram1[k] * (np.log(histogram1[k]+1)-np.log(histogram2[k]+1))
+    for k in histogram2.keys():
+        dkl_2 += histogram2[k] * (np.log(histogram2[k]+1)-np.log(histogram1[k]+1))
+        
+    resistor_average_difference = 1/dkl_1 + 1/dkl_2
+
+    return resistor_average_difference
 
 def sliding_window(signal,winSize,step=1):
     """Returns a generator that will iterate through
