@@ -95,19 +95,48 @@ As a simple start for our experiment, the classification will be based on a thre
 - **False alarm:** The False alarms are the number of points that are classified as `seizure` outside a real seizure. This metric is very important as we don't want the patient to receive a stimulation when no seizure occurs. It can be dangerous for him.
 - **Delay:** The delay is defined as the number of seconds between the real beginning of a seizure and the first signal being classified as a seizure. This metric is also capital as the stimulation needs to occur as soon as possible in order to stop the seizure efficiently.
 
+### Sliding window calculation
+
+
+
 ### Features
 
 For now, the following features have been tested on patient 1 and 2 in order to ensure that all of the functions work correctly and are generic enough in order to be applied to the full dataset. All features are calculated using a sliding window of size  `sliding_window=128` and a step size of size `step_size=64` .
 
-**Energy**
+#### Min
+
+$$
+\min_{x \in [|x_0, x_0+N|]}\{y_x\}
+$$
+
+![](img/patient_2_seizure_1_min_scaled.png)
+
+
+
+####  Max
+
+$$
+\max_{x \in [|x_0, x_0+N|]}\{y_x\}
+$$
+
+![](img/patient_2_seizure_1_max_scaled.png)
+
+
+
+#### Energy
+
 $$
 Energy = \sum_{x=x_0}^{x_0+N} y_x^2
 $$
 
 
+
+
 ![](img/patient_2_seizure_1_energy_scaled.png)
 
-**Line length**
+#### Line length
+
+Line length is defined as the running sum of the absolute differences between all consecutive samples within a predefined window. The value of this feature grows as the data sequence magnitude or signal variance increases.
 $$
 LineLength = \sum_{x=x_0+1}^{x_0+N}|y_x - y_{x-1}|
 $$
@@ -117,15 +146,111 @@ $$
 
 ![patient_2_seizure_1_linelength_scaled](img/patient_2_seizure_1_linelength_scaled.png)
 
-**Moving Average**
+#### Moving Average
+
+Moving average is commonly used with time series data to smooth out short-term fluctuations and highlight longer-term trends or cycles. 
+
+**Feature calculation**
 $$
 MovingAverage = \frac{1}{N}\sum_{x=x_0}^{x_0+N}y_x
 $$
 
 
 
-
 ![patient_2_seizure_1_movingaverage_scaled](img/patient_2_seizure_1_movingaverage_scaled.png)
+
+#### Skewness
+
+Skewness indicates the symmetry of the probability density function of the amplitude of a time series. It is a good indicator of the tendency of the time series amplitude in a given portion of time (here we look at this value during a window). 
+
+![](img/skewness.png)
+
+A window with many small values and few large values is positively skewed (right tail) and will have a positive skewness while a window with many large values and few small values is negatively skewed (left tail) and will have a negative skewness.
+
+**Feature calculation**
+$$
+Skewness = \frac{\sqrt{N(N-1)}}{N(N-2)} g \text{  with   } g = \frac{\sum_{x=x_0}^{x_0+N} (y_x - \mu)^3}{\sigma^3}
+$$
+
+
+![](img/patient_2_seizure_1_skewness_scaled.png)
+
+
+
+
+
+
+
+#### Kurtosis
+
+Kurtosis measures the peakedness of the probability density function of the amplitude of a time series. A kurtosis value close to zero indicates a Gaussian-like peakedness. Probability density function with relatively sharp peaks have a positive kurtosis while probability density function  that have relatively flat peaks have a negative kurtosis.
+$$
+Kurtosis =  \frac{\sum_{x=x_0}^{x_0+N} (y_x - \mu)^4}{N\sigma^2} - 3
+$$
+![](img/patient_2_seizure_1_kurtosis_scaled.png)
+
+#### Shannon Entropy
+
+$$
+ShannonEntropy = \sum_{x=x_0}^{x_0+N} \text{freq}(y_x) \text{log}(\text{freq}(y_x))
+$$
+
+
+
+#### Local Binary Patterns
+
+Local binary patterns is a type of visual descriptor used for classification in computer vision. LBP was first described in 1994, it has since been found to be a powerful feature for texture classification. Even if we are not dealing with images in our case, an adapted version of the LBP for 1D dimentional signals can possibly be a good feature for the task of seizure classification. The choice of this feature is particularly motivated by a paper using this feature for voice signal segmentation and voice activity detection. More informations about this work can be found here : [Local binary patterns for 1-D signal processing](https://ieeexplore.ieee.org/document/7096717).
+
+**Feature computation**
+
+Inside each of our sliding window (here the window go from 1 to 21), we shift a window in order to extract the $P$ neighbours of a given data point $p_i$ (here $P$ is equal to 8). Then we substract to each of the neighbors of $i$ the value of $p_i$ and set their values to 1 if the result is equal or positive or 0 si the result is negative.
+
+![](img/lbp_explained.jpg)
+$$
+LBP\_decimal\_value= \sum_{r=0}^{p/2^{-1}}\left\{S[x[i+r-P/_{2}]-x[i]]2^{r}+S[x[i+r+1]-x[i]]2^{r+P/2}\right\}
+$$
+Those values are then recorded in an histogram:
+
+![](img/lbp_explained_histograms.jpg)
+
+
+
+At the end, we can compare the similarity between two signals within a window by comparing the histograms obtained with the previous method. In order to do so, we use the Kullback– Leibler (KL) divergence  as described in [Quantitative Analysis of Facial Paralysis Using Local Binary Patterns in Biomedical Videos](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=4806065).
+
+
+
+
+
+#### Phase synchrony
+
+
+
+Neurons initiate electrical oscillations that are contained in multiple frequency bands such as alpha (8–12 Hz), beta (13–30 Hz) and gamma (40–80 Hz) and have been linked to a wide range of cognitive and perceptual processes. It has been shown that before and during a seizure the amount of synchrony between these oscillations from neurons located in different regions of the brain changes significantly. Thus, the amount of synchrony between multiple neural signals is a strong indicator in predicting or detecting seizures. To quantify the level of synchrony between two neural signals, a phase locking value (PLV) can be computed that accurately measures the phase-synchronization between two signal sites in the brain.
+
+**Feature computation**
+$$
+Y_{0}=Re(Y_{0})+jIm(Y_{0}),\quad Y_{1}=Re(Y_{1})+jIm(Y_{1})
+$$
+
+$$
+\phi_{k}=\arctan{Im(V_{k})\over Re(V_{k})}
+$$
+
+$$
+\Delta\phi=\phi_{1}-\phi_{0}
+$$
+
+
+$$
+PLV={1\over N}\sqrt{\left(\sum_{i=0}^{N-1}sin(\Delta \phi_{i})\right)^{2}+\left(\sum_{i=0}^{N-1}cos(\Delta \phi_{i})\right)^{2}}
+$$
+![](img/patient_2_seizure_1_phase_synchrony_scaled.png)
+
+
+
+![](img/patient_2_seizure_1_preprocessed_phase_synchrony_scaled.png)
+
+
 
 ### Algorithm
 
@@ -164,6 +289,8 @@ Given a threshold  `t`, we do the following:
 
 
 ## Conclusion
+
+
 
 
 
