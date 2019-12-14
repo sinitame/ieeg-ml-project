@@ -77,7 +77,7 @@ def plot_scores(thresholds, scores):
     plt.legend()
     plt.show()
     
-def plot_feature(signal, feature, start, end, scale=True):
+def plot_feature(signal, feature, start, end, seizure_range= None, scale=True):
     
     if scale:
         normalization_term = np.max(np.abs(signal))/np.max(np.abs(feature))
@@ -86,8 +86,14 @@ def plot_feature(signal, feature, start, end, scale=True):
 
     sub_signal = np.array(signal[start:end+1])
     sub_feature = np.array(feature[start:end+1])
-
     plt.figure(figsize=(20,10))
+    
+    if seizure_range:
+        seizure_start = max(start, seizure_range[0])
+        seizure_end = min(seizure_range[1], end)
+        plt.axvspan(seizure_start, seizure_end, color='royalblue', alpha=0.5)
+    
+    
     plt.plot(sub_signal)
     plt.plot(sub_feature*normalization_term)
     plt.show()
