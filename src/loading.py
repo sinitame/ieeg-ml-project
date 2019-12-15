@@ -44,7 +44,7 @@ def download_patient_file(data_path, patient_id, file_name, verbose=False):
     
     
     
-def compute_files_of_seizures(patient_id, seizures_start,seizures_end, all_seizures=False, delta = 0):
+def compute_files_of_seizures(data_path, patient_id, seizures_start,seizures_end, all_seizures=False, delta = 0):
     """
     This function calculate in which file the seizure is occuring 
     depending on the start time and the end time in seconds given in
@@ -62,7 +62,7 @@ def compute_files_of_seizures(patient_id, seizures_start,seizures_end, all_seizu
     TODO : Check the min and max possible hours
     """
     
-    prefix = "../data/"
+    prefix = data_path
     hours = []
     files = []
 
@@ -150,7 +150,7 @@ def load_patient_seizures(data_path, patient_id, all_seizures=False, delta=0, ve
     infos["sf"] = sf
     
     # Find the file of the seizure
-    hours, files = compute_files_of_seizures(patient_id, seizure_start, seizure_end, all_seizures, delta)
+    hours, files = compute_files_of_seizures(data_path, patient_id, seizure_start, seizure_end, all_seizures, delta)
     ranges = compute_seizures_ranges(seizure_start,seizure_end,sf)
     
     if verbose:
