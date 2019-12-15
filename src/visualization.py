@@ -13,9 +13,11 @@ def plot_one_signal(data, seizure_ranges, plot_range, seizure_id = -1):
     print("data", len(data))
     
     plt.figure(figsize=(20,10))
-    plt.plot(time,data[start:end])
+
     for seizure_start, seizure_end in seizure_ranges:
-        plt.axvspan(seizure_start, seizure_end, color='royalblue', alpha=0.5)
+        plt.axvspan(seizure_start, seizure_end, color='dodgerblue', alpha=0.2)
+
+    plt.plot(time,data[start:end], color='dodgerblue')
     plt.xlabel('Sample step')
     plt.ylabel('Voltage')
     eeg_plot = plt.plot()
@@ -32,9 +34,10 @@ def plot_signal_on_ax(ax, data, seizure_ranges, plot_range, seizure_id = -1):
     end = min(int(seizure_ranges[-1][1] + plot_range//2), 512*3600 - 1)
     time = np.arange(start,end,1)
     
-    ax.plot(time,data[start:end] )
     for seizure_start, seizure_end in seizure_ranges:
-        ax.axvspan(seizure_start, seizure_end, color='royalblue', alpha=0.5)
+        ax.axvspan(seizure_start, seizure_end, color='dodgerblue', alpha=0.2)
+
+    ax.plot(time,data[start:end], color='dodgerblue')
     ax.set_ylabel('Voltage')
     eeg_plot = plt.plot()
     
@@ -60,6 +63,7 @@ def plot_metrics(thresholds, false_alarms, delays, precision):
         axs[0,1].plot([pt[i] for pt in delays], thresholds, label = 'seizure %s'%i)
     axs[0,1].set_ylabel('Threhold')
     axs[0,1].set_xlabel('Delays')
+    axs[0,1].legend()
     
     axs[1,0].plot(precision, thresholds)
     axs[1,0].set_ylabel('Threshold')
@@ -69,6 +73,7 @@ def plot_metrics(thresholds, false_alarms, delays, precision):
         axs[1,1].plot([pt[i] for pt in delays], false_alarms, label = 'seizure %s'%i)
     axs[1,1].set_ylabel('False Alarm')
     axs[1,1].set_xlabel('Delays')
+    axs[1,1].legend()
     
 def plot_scores(thresholds, scores):
     plt.figure(figsize=(20,10))
@@ -91,9 +96,9 @@ def plot_feature(signal, feature, start, end, seizure_range= None, scale=True):
     if seizure_range:
         seizure_start = max(start, seizure_range[0])
         seizure_end = min(seizure_range[1], end)
-        plt.axvspan(seizure_start, seizure_end, color='royalblue', alpha=0.5)
+        plt.axvspan(seizure_start, seizure_end, color='dodgerblue', alpha=0.2)
     
     
-    plt.plot(sub_signal)
-    plt.plot(sub_feature*normalization_term)
+    plt.plot(sub_signal, color='dodgerblue')
+    plt.plot(sub_feature*normalization_term, color='deepskyblue')
     plt.show()
