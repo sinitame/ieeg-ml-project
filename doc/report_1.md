@@ -1,7 +1,3 @@
-
-
-
-
 # Toward a systematic way to evaluate feature selection for iEEG analyses
 
 ## Introduction
@@ -61,23 +57,52 @@ The following table gives an idea of the duration range of the seizure for each 
 |   17    |         2          |    97.9362    |   1.28925    |   97.0246    |   98.8479    |
 |   18    |         5          |    199.132    |   100.565    |   71.4387    |   300.651    |
 
+
+
 To get a better view of the repartition of seizure duration, and the repartition of the number of seizures for each patients, we can refer to the following figures.
+
+
+
+
 
 **Histogram of seizures duration**
 
-![seizure_duration_frequency](img/seizure_duration_frequency.png)
+<figure>
+  <img src="img/seizure_duration_frequency.png" alt="" />
+  <center>
+    <figcaption><bold>Figure 1.</bold> Histogram of seizure duration for all patients<figcaption>
+  </center>
+</figure>
+
+
 
 **Histogram of the number of seizure per patient**
 
-![number_of_seizure_frequency](img/number_of_seizure_frequency.png)
+<figure>
+  <img src="img/number_of_seizure_frequency.png" alt="" />
+  <center>
+    <figcaption><bold>Figure 2.</bold> Histogram of the number of seizures per patitients for all patients<figcaption>
+  </center>
+</figure>
 
 
 
 In addition to the heterogeneity of the seizures between patients and for a given patient, we can also observe heterogeneity within the recordings of a given seizure depending on the electrode on which we collect the signals. The following plot shows the plot of 5 electrodes of patient 2 during a period where a seizure occurs (the seizure is highlighted in blue).
 
+
+
+
+
+
+
 **Example of seizure signal**
 
-![patient_2_seizure_1_channels](img/patient_2_seizure_1_channels.png)
+<figure>
+    <img src="img/patient_2_seizure_1_channels.png" alt="" />
+  <center>
+    <figcaption><bold>Figure 3.</bold> Plot of iEEG signals of patient 2 on 5 sensors during seizure 1<figcaption>
+  </center>
+</figure>
 
 
 
@@ -85,9 +110,7 @@ This first exploration of the data gives an idea of how hard it can be to find a
 
 ## Methods
 
-In this part, we will present the method that we designed in order  to evaluate feature selection for iEEG analyses according to each patient. In order to do so, we will define three metrics that we will focus on. After that, we will present how those metrics were computed with different features and finally we will present the results that we obtainned with our method.
-
-As a simple start for our experiment, the classification will be based on a threshold. Seizures will be considered as detected when the value of the feature's signal is above the given threshold and as undetected if it's value is below the given threshold.
+In this part, we will present the method that we designed in order  to evaluate feature selection for iEEG analyses according to each patient. In order to do so, we will define three metrics that we will focus on. After that, we will present how those metrics were computed with different features and finally we will present the results that we obtainned with our method. As a simple start for our experiment, the classification will be based on a threshold. Seizures will be considered as detected when the value of the feature's signal is above the given threshold and as undetected if it's value is below the given threshold.
 
 ### Metrics
 
@@ -99,9 +122,14 @@ As a simple start for our experiment, the classification will be based on a thre
 
 ### Features
 
-In order to extract informations from the signal during short period of time we need to compute different features. A feature is a value that we compute from a window that we shift across all the input signal. Each point of the feature signal is generated from a window of size $\texttt{window_size}$. An example is given in the followin figure.
+In order to extract informations from the signal during short period of time we need to compute different features. A feature is a value that we compute from a window that we shift across all the input signal. Each point of the feature signal is generated from a window of size $\texttt{window_size}$. An example is given in Figure 4.
 
-![](img/feature-computation.png)
+<figure>
+  <center>
+    <img src="img/feature-computation.png" height="250px" />
+    <figcaption><bold>Figure 4.</bold> Feature computation example with sliding window<figcaption>
+  </center>
+</figure>
 
 ### Implemented features
 
@@ -113,7 +141,7 @@ $$
 \min_{x \in [|x_0, x_0+N|]}\{y_x\}
 $$
 
-![](img/patient_2_seizure_1_min_scaled.png)
+<img src="img/patient_2_seizure_1_min_scaled.png" height="300px" />
 
 
 
@@ -123,7 +151,7 @@ $$
 \max_{x \in [|x_0, x_0+N|]}\{y_x\}
 $$
 
-![](img/patient_2_seizure_1_max_scaled.png)
+<img src="img/patient_2_seizure_1_max_scaled.png" height="300px" />
 
 
 
@@ -133,10 +161,13 @@ $$
 Energy = \sum_{x=x_0}^{x_0+N} y_x^2
 $$
 
+<img src="img/patient_2_seizure_1_energy_scaled.png" height="300px" />
 
 
 
-![](img/patient_2_seizure_1_energy_scaled.png)
+
+
+
 
 #### Line length
 
@@ -145,10 +176,10 @@ $$
 LineLength = \sum_{x=x_0+1}^{x_0+N}|y_x - y_{x-1}|
 $$
 
+<img src="img/patient_2_seizure_1_linelength_scaled.png" height="300px" />
 
 
 
-![patient_2_seizure_1_linelength_scaled](img/patient_2_seizure_1_linelength_scaled.png)
 
 #### Moving Average
 
@@ -159,9 +190,9 @@ $$
 MovingAverage = \frac{1}{N}\sum_{x=x_0}^{x_0+N}y_x
 $$
 
+<img src="img/patient_2_seizure_1_movingaverage_scaled.png" height="300px" />
 
 
-![patient_2_seizure_1_movingaverage_scaled](img/patient_2_seizure_1_movingaverage_scaled.png)
 
 #### Skewness
 
@@ -176,8 +207,7 @@ $$
 Skewness = \frac{\sqrt{N(N-1)}}{N(N-2)} g \text{  with   } g = \frac{\sum_{x=x_0}^{x_0+N} (y_x - \mu)^3}{\sigma^3}
 $$
 
-
-![](img/patient_2_seizure_1_skewness_scaled.png)
+<img src="img/patient_2_seizure_1_skewness_scaled.png" height="300px" />
 
 
 
@@ -191,13 +221,9 @@ Kurtosis measures the peakedness of the probability density function of the ampl
 $$
 Kurtosis =  \frac{\sum_{x=x_0}^{x_0+N} (y_x - \mu)^4}{N\sigma^2} - 3
 $$
-![](img/patient_2_seizure_1_kurtosis_scaled.png)
+<img src="img/patient_2_seizure_1_kurtosis_scaled.png" height="300px" />
 
-#### Shannon Entropy
-
-$$
-ShannonEntropy = \sum_{x=x_0}^{x_0+N} \text{freq}(y_x) \text{log}(\text{freq}(y_x))
-$$
+#### 
 
 
 
@@ -208,24 +234,28 @@ Local binary patterns is a type of visual descriptor used for classification in 
 **Feature computation**
 
 Inside each of our sliding window (here the window go from 1 to 21), we shift a window in order to extract the $P$ neighbours of a given data point $p_i$ (here $P$ is equal to 8). Then we substract to each of the neighbors of $i$ the value of $p_i$ and set their values to 1 if the result is equal or positive or 0 si the result is negative.
-
-![](img/lbp_explained.jpg)
 $$
 LBP\_decimal\_value= \sum_{r=0}^{p/2^{-1}}\left\{S[x[i+r-P/_{2}]-x[i]]2^{r}+S[x[i+r+1]-x[i]]2^{r+P/2}\right\}
 $$
-Those values are then recorded in an histogram:
+Here is an example of how to compute the LBP for a window and the generate the histogram of patterns. We can see that we obtain two different histograms for two different signals:
 
-![](img/lbp_explained_histograms.jpg)
+
+
+<figure>
+  <center>
+    <img src="img/lbp_explained.jpg" height="200px" />
+    <img src="img/lbp_explained_histograms.jpg" height="200px" />
+    <figcaption><bold>Figure 5.</bold> Local binary pattern calculation<figcaption>
+  </center>
+</figure>
 
 
 
 At the end, we can compare the similarity between two signals within a window by comparing the histograms obtained with the previous method. In order to do so, we use the Kullback– Leibler (KL) divergence  as described in [Quantitative Analysis of Facial Paralysis Using Local Binary Patterns in Biomedical Videos](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=4806065).
 
-
+<img src="img/patient_2_seizure_1_lbp_scaled.png" height="300px" />
 
 #### Phase synchrony
-
-
 
 Neurons initiate electrical oscillations that are contained in multiple frequency bands such as alpha (8–12 Hz), beta (13–30 Hz) and gamma (40–80 Hz) and have been linked to a wide range of cognitive and perceptual processes. It has been shown that before and during a seizure the amount of synchrony between these oscillations from neurons located in different regions of the brain changes significantly. Thus, the amount of synchrony between multiple neural signals is a strong indicator in predicting or detecting seizures. To quantify the level of synchrony between two neural signals, a phase locking value (PLV) can be computed that accurately measures the phase-synchronization between two signal sites in the brain.
 
@@ -255,6 +285,16 @@ As the signal obtainned from the raw phase synchrony is very noisy, we process i
 
 
 ![](img/patient_2_seizure_1_preprocessed_phase_synchrony_scaled.png)
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -308,6 +348,10 @@ In order to compute this second score, we look to how close are the different co
 
 <img src="img/s2-score.png" height="400px" />
 
+
+
+
+
 At the end, the S2 score is computed as:
 $$
 S2 = \sum_{py}\sum_{px} distance(p_x,p_y)
@@ -326,31 +370,59 @@ $$
 
 ## Results
 
-### Energy
+|                      | Patient 1 | Patient 2 |
+| -------------------- | :-------: | :-------: |
+| Min                  |  6875.6   |   85.7    |
+| Max                  |   10.9    |   15.8    |
+| Moving average       |   31.8    |   10.4    |
+| Energy               |   23.4    |   15.7    |
+| Line length          |   48.6    |   27.9    |
+| Kurtosis             |   28.1    |   55.8    |
+| Skewness             |    8.4    |   10.1    |
+| Local binary pattern |   201.5   |   166.3   |
+| Phase synchrony      |   140.4   |   32.6    |
 
-|                          Patient 1                           |                          Patient 2                           |
-| :----------------------------------------------------------: | :----------------------------------------------------------: |
-| ![patient_1_all_metrics_energy](img/patient_1_all_metrics_energy.png) | ![patient_2_all_metrics_energy](img/patient_2_all_metrics_energy.png) |
+As we can see in this table, features have different scores depending on the patient on which they are applied. With patient 1, Min feature seems to perform extremely well while Skewness seems not that good. For patient 2, we see that the Local Binary pattern performs better.
 
-### Line length 
+The following tables show the metrics that we get by using the best threshold found by our method. The results are presented for all of the seizures of patient 1 and 2. The two first lines show the two best feature and the first one show the worst one according to the score that we defined earlier in this work.
 
-|                          Patient 1                           |                          Patient 2                           |
-| :----------------------------------------------------------: | :----------------------------------------------------------: |
-| ![patient_1_all_metrics_linelength](img/patient_1_all_metrics_linelength.png) | ![patient_2_all_metrics_linelength](img/patient_2_all_metrics_linelength.png) |
+### Patient 1 metrics
 
-### Moving average
-
-|                          Patient 1                           |                          Patient 2                           |
-| :----------------------------------------------------------: | :----------------------------------------------------------: |
-| ![patient_1_all_metrics_movingaverage](img/patient_1_all_metrics_movingaverage.png) | ![patient_2_all_metrics_movingaverage](img/patient_2_all_metrics_movingaverage.png) |
+|              | **Seizure 1** | **Seizure 1** | **Seizure 1** | **Seizure 2** | **Seizure 2** | **Seizure 2** |
+| ------------ | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+|              | **FA**        | **Delays**    | **Threshold** | **FA**        | **Delays**    | **Threshold** |
+| **Min**      | **76**        | 6.1           | **0.151**     | **76**        | 6.9           | **0.151**     |
+| **LBP**      | **2658**      | **0.0**       | **0.81**      | **3216**      | 6.0           | **0.80**      |
+| **Skewness** | 2469          | 1.2           | **0.32**      | 92            | 0.1           | **0.55**      |
 
 
 
-## Discussion
+
+
+### Patient 2 metrics
+
+|              | **Seizure 1** | **Seizure 1** | **Seizure 1** | **Seizure 2** | **Seizure 2** | **Seizure 2** |
+| ------------ | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+|              | **FA**        | **Delays**    | **Threshold** | **FA**        | **Delays**    | **Threshold** |
+| **LBP**      | **157**       | **0**         | **0.75**      | **108**       | **3**         | **0.77**      |
+| **Min**      | 2024          | 8.7           | **0.19**      | 2024          | 0.87          | **0.19**      |
+| **Skewness** | 3965          | 2             | **0.30**      | 378           | 0             | **0.50**      |
 
 
 
 ## Conclusion
+
+This project allowed me to discover how machine learning can be applied to epileptic seizure detection and how feature selection is important in order to get good metrics for classification.
+
+One of my main contribution to this project was to propose a systematic way of quantifiying how good is a feature for a given patient with respect to the metrics are considered to be relevant for our problem (False alarms, Delay and precision). By finding a way to score features, I was able to show that some of them might perform better on one patient or another.
+
+The next steps for this study would be
+
+- To fine tune the score formula in order to ensure that we do not give too much importance to a score compared to another (S2 score can induce high scores when thresholds are the same for all the seizure even if the metrics for this feature is not really good).
+- To validate the fact that using features with high scores to train our classifiers can result in better accuracy for a patient seizure detaction
+- Find efficient ways to implement the different features into hardware in order to integrate them in the final design of the implentable seizure detection device.
+
+
 
 
 
