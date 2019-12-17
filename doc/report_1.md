@@ -63,11 +63,11 @@ The following table gives an idea of the duration range of the seizure for each 
 
 To get a better view of the repartition of seizure duration, and the repartition of the number of seizures for each patients, we can refer to the following figures.
 
-**Seizure duration frequency**
+**Histogram of seizures duration**
 
 ![seizure_duration_frequency](img/seizure_duration_frequency.png)
 
-**Number of seizure per patient frequency**
+**Histogram of the number of seizure per patient**
 
 ![number_of_seizure_frequency](img/number_of_seizure_frequency.png)
 
@@ -95,11 +95,15 @@ As a simple start for our experiment, the classification will be based on a thre
 - **False alarm:** The False alarms are the number of points that are classified as `seizure` outside a real seizure. This metric is very important as we don't want the patient to receive a stimulation when no seizure occurs. It can be dangerous for him.
 - **Delay:** The delay is defined as the number of seconds between the real beginning of a seizure and the first signal being classified as a seizure. This metric is also capital as the stimulation needs to occur as soon as possible in order to stop the seizure efficiently.
 
-### Sliding window calculation
-
 
 
 ### Features
+
+In order to extract informations from the signal during short period of time we need to compute different features. A feature is a value that we compute from a window that we shift across all the input signal. Each point of the feature signal is generated from a window of size $\texttt{window_size}$. An example is given in the followin figure.
+
+![](img/feature-computation.png)
+
+### Implemented features
 
 For now, the following features have been tested on patient 1 and 2 in order to ensure that all of the functions work correctly and are generic enough in order to be applied to the full dataset. All features are calculated using a sliding window of size  `sliding_window=128` and a step size of size `step_size=64` .
 
@@ -219,8 +223,6 @@ At the end, we can compare the similarity between two signals within a window by
 
 
 
-
-
 #### Phase synchrony
 
 
@@ -248,6 +250,10 @@ $$
 
 
 
+As the signal obtainned from the raw phase synchrony is very noisy, we process it in order to make it more smoother. Here we computed the minimum in sliding windows of size $\texttt{window_size}=1024$ with a step size of $\texttt{window_size}=512$. The signal is also inverted in order to consider the asynchrony between the signals wether than the synchrony.
+
+
+
 ![](img/patient_2_seizure_1_preprocessed_phase_synchrony_scaled.png)
 
 
@@ -259,8 +265,64 @@ The algorithm used to compute the Precision, the Delay and the False alarm rate 
 Given a threshold  `t`, we do the following:
 
 - Precision: we check if there is a value of our feature which is superior to `t` within each seizure range (it means that the seizure have been detected by the system). We return the number of detection upon the number of seizures.
+
+  ![](img/accuracy.png)
+
 - Delay: we compute the number of values between the begining of the seizure and the first detection of a seizure (feature value >`t`). We convert the number of values (which is in the feature space a number of window slices) into a number of samples (number of values in the sampling space). We then convert the obtained value to time using the sampling frequency `fs`.
+
+  ![](img/delay.png)
+
 - False Alarm: we count the number of values of the feature signal that are above the threshold outside a seizure.
+
+  ![](img/false-alarms.png)
+
+
+
+### Feature scoring
+
+In order to measure how good is a feature to classify if a seizure is occuring or not, we need to difine a way to score it with respect to the metrics that we described earlier. In order to find the best threshold for the detection of a given seizure, we need to minimize false alarms, delay and to maximize precision. 
+
+By looking at the plot from Figure () we can see that when looking at the false alarms and the delays according to different threshold values, we can find the best possible threshold $\texttt{t_best}$ by finding the point with the minimal distance with the origin.
+
+![image-20191217112610582](img/fa-delay-threshold.png)
+
+When we find this $\texttt{t_best}$ value, we still need to quantify how good this threshold with respect to our metrics and to do so, we compute a score by using the following formulae. The idea is to take the inverse  of the norm 2 of $\texttt{t_best}$ coordinates in the space of ou metrics: $\|(x,y,z)\|^2 = \sqrt{x^2 + y^2 + z^2}$. 
+
+We know that if this distance is low, we have good metrics (FA are low and Delay also) and so our score needs to be high. That's why we take the inverse of this norm. With $x = w_1 * FA$, $y = w_2 * D$, $z = w_3 * 1/P$ we have:
+$$
+S1 = \frac{1}{\sqrt{(w_1 * FA)^2+ (w_2 * D)^2+ \frac{1}{(w_3 * P)^2} + \lambda}}
+$$
+Remarks:
+
+* $\lambda$ is a small number avoiding division by zero
+* We consider that each point in a 3-D coordinates point in the space of False Alarm, Delay and Precision for a given threshold value
+* FA and D are normalised before the computation of the score
+* We enforce the Delay to be inferior to $D_{max}$
+* $w_1, w_2, w_3$ are wights that can be defined to give more importance of some metrics upon others
+
+
+
+Then another thing that we need to guaranty is that for all our seizures, we have $\texttt{t_best}$ thresholds that are close to each other. This means that a given $\texttt{t_best}$ value can be applied to almost all the seizures of a given patient and still be the best for all these different seizure: This means that our feature can perform well on all the seizures of a given patient.
+
+In order to compute this second score, we look to how close are the different couples ($\texttt{t_best}$, $\texttt{s1_score}$) are in the space of $\texttt{best_thresholds}$ and $\texttt{s1_scores}$. To do so we sum up the distance between each points. The higher is this value, the less these points are closed to each others.
+
+<img src="img/s2-score.png" height="400px" />
+
+At the end, the S2 score is computed as:
+$$
+S2 = \sum_{py}\sum_{px} distance(p_x,p_y)
+$$
+
+### Final score computation 
+
+With the different S1 scores that we get for each seizures for a given patient and the resulting S2 score, we can then compute the final score of the feature for a given patient. One term represent the average of the scores that we obtained upon all seizures and the second one is the inverse of the S2 score with represents how close are these optimal values between each others.
+
+
+
+$$
+S = \frac{\sum_{k=0}^n S1_k}{n} \frac{1}{S2}
+$$
+
 
 ## Results
 
