@@ -11,3 +11,12 @@ It is know that machine learning can help achieve this goal, and many studies ha
 In order to overcome this weakness, this project focus on one of the key component of machine learning : feature selection. Fiding the relevant feature for a given problem can often drasticly improve the performance of a model wether it's a classification or a regression task. But without a way of quantifying the quality of a given feature for a model or a patient it is hard to know if the selected feature are the best for our problem. 
 
 The aim of this project is to present a systematic way to evaluate feature selection for iEEG analyses and to apply this method to extract insights from the SWEC-ETHZ iEEG Database.
+
+
+## Final report
+
+The final report of this project can be found [here](doc/final_report.pdf)
+
+## Final presentation
+
+The slides of the final presentation for this project can be found [here](slides/final_presentation.pdf)
