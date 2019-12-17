@@ -93,18 +93,14 @@ In addition to the heterogeneity of the seizures between patients and for a give
 
 
 
-
-
 **Example of seizure signal**
 
 <figure>
-    <img src="img/patient_2_seizure_1_channels.png" alt="" />
-  <center>
+   <center>
+    <img src="img/patient_2_seizure_1_channels.png" alt="" height="250px"/>
     <figcaption><bold>Figure 3.</bold> Plot of iEEG signals of patient 2 on 5 sensors during seizure 1<figcaption>
   </center>
 </figure>
-
-
 
 This first exploration of the data gives an idea of how hard it can be to find a generalized machine learning model which is able to detect a seizure with high accuracy, low false alarm rate and with a small delay for all patients. These observations motivates us to find a way to select relevant features for each patients according to their seizure episode history in order to design a specific machine learning model which could maximize the previous metrics.
 
@@ -126,7 +122,7 @@ In order to extract informations from the signal during short period of time we 
 
 <figure>
   <center>
-    <img src="img/feature-computation.png" height="250px" />
+    <img src="img/feature-computation.png" height="200px" />
     <figcaption><bold>Figure 4.</bold> Feature computation example with sliding window<figcaption>
   </center>
 </figure>
@@ -176,7 +172,7 @@ $$
 LineLength = \sum_{x=x_0+1}^{x_0+N}|y_x - y_{x-1}|
 $$
 
-<img src="img/patient_2_seizure_1_linelength_scaled.png" height="300px" />
+<img src="img/patient_2_seizure_1_linelength_scaled.png" height="260px" />
 
 
 
@@ -190,7 +186,7 @@ $$
 MovingAverage = \frac{1}{N}\sum_{x=x_0}^{x_0+N}y_x
 $$
 
-<img src="img/patient_2_seizure_1_movingaverage_scaled.png" height="300px" />
+<img src="img/patient_2_seizure_1_movingaverage_scaled.png" height="260px" />
 
 
 
@@ -198,7 +194,7 @@ $$
 
 Skewness indicates the symmetry of the probability density function of the amplitude of a time series. It is a good indicator of the tendency of the time series amplitude in a given portion of time (here we look at this value during a window). 
 
-![](img/skewness.png)
+<img src="img/skewness.png" height="100px" />
 
 A window with many small values and few large values is positively skewed (right tail) and will have a positive skewness while a window with many large values and few small values is negatively skewed (left tail) and will have a negative skewness.
 
@@ -211,21 +207,15 @@ $$
 
 
 
-
-
-
-
 #### Kurtosis
 
 Kurtosis measures the peakedness of the probability density function of the amplitude of a time series. A kurtosis value close to zero indicates a Gaussian-like peakedness. Probability density function with relatively sharp peaks have a positive kurtosis while probability density function  that have relatively flat peaks have a negative kurtosis.
+
+**Feature calculation**
 $$
 Kurtosis =  \frac{\sum_{x=x_0}^{x_0+N} (y_x - \mu)^4}{N\sigma^2} - 3
 $$
 <img src="img/patient_2_seizure_1_kurtosis_scaled.png" height="300px" />
-
-#### 
-
-
 
 #### Local Binary Patterns
 
@@ -312,6 +302,10 @@ Given a threshold  `t`, we do the following:
 
   ![](img/delay.png)
 
+
+
+
+
 - False Alarm: we count the number of values of the feature signal that are above the threshold outside a seizure.
 
   ![](img/false-alarms.png)
@@ -346,9 +340,7 @@ Then another thing that we need to guaranty is that for all our seizures, we hav
 
 In order to compute this second score, we look to how close are the different couples ($\texttt{t_best}$, $\texttt{s1_score}$) are in the space of $\texttt{best_thresholds}$ and $\texttt{s1_scores}$. To do so we sum up the distance between each points. The higher is this value, the less these points are closed to each others.
 
-<img src="img/s2-score.png" height="400px" />
-
-
+<img src="img/s2-score.png" height="300px" />
 
 
 
@@ -356,6 +348,9 @@ At the end, the S2 score is computed as:
 $$
 S2 = \sum_{py}\sum_{px} distance(p_x,p_y)
 $$
+
+
+
 
 ### Final score computation 
 
