@@ -17,13 +17,13 @@ The aim of this project is to present a systematic way to evaluate feature selec
 
 A set of tools have been implemented in order to facilitate experiments. All those helper function are located in the [source](src/) directory of this project. Example usage can be found in [notebooks](notebooks/).
 
-#### Feature processing (`features.py`)
+**Feature processing (`features.py`)**
 This file contains all the function used to compute features on iEEG signals.
 
-#### Filtering methods (`filters.py`)     
+**Filtering methods (`filters.py`)**     
 This file contains all the function needed to filter signals.
 
-#### Helpers (`helpers.py`)
+**Helpers (`helpers.py`)**
 This file contains a set of functions in order to perform the following:
 
 - Selecting best sensor (according to the power signals during seizure)
@@ -31,32 +31,32 @@ This file contains a set of functions in order to perform the following:
 - Merge signals
 - Compute scores
 
-#### Data loading functions (`loading.py`)      
+**Data loading functions (`loading.py`)**    
 This file contains all the functions to load and download patient data from the official ETHZ database.
 
-#### Metrics measurments (`metrics.py`)    
+**Metrics measurments (`metrics.py`)**   
 This file contains all the functions used to compute the metrics used to score features.
 
-#### Visualization helpers (`visualization.py`)
+**Visualization helpers (`visualization.py`)**
 This file contains some helper function to plot iEEG signals easily.
 
 ### Notebooks
 
 A set of notebooks have been developped in order to show the usage of the different helpers:
 
-### Dataset analysis
+**Dataset analysis**
 - data_loading_plotting.ipynb 
 - dataset_exploration.ipynb
 - iEGG_visualization.ipynb
 
-### Features analysis
+**Features analysis**
 - implemented_features.ipynb
 - Feature_selection.ipynb
 - Features_evaluation.ipynb
 - Feature_selection_patient_1.ipynb
 - Feature_selection_patient_2.ipynb
 
-### Signal processing
+**Signal processing**
 - Filtering.ipynb
 - Fourrier_transform.ipynb
 
