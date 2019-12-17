@@ -316,11 +316,11 @@ Given a threshold  `t`, we do the following:
 
 In order to measure how good is a feature to classify if a seizure is occuring or not, we need to difine a way to score it with respect to the metrics that we described earlier. In order to find the best threshold for the detection of a given seizure, we need to minimize false alarms, delay and to maximize precision. 
 
-By looking at the plot from Figure () we can see that when looking at the false alarms and the delays according to different threshold values, we can find the best possible threshold $\texttt{t_best}$ by finding the point with the minimal distance with the origin.
+By looking at the plot from the following Figure, we can see that when looking at the false alarms and the delays according to different threshold values, we can find the best possible threshold $\texttt{t_best}$ by finding the point with the minimal distance with the origin.
 
 ![image-20191217112610582](img/fa-delay-threshold.png)
 
-When we find this $\texttt{t_best}$ value, we still need to quantify how good this threshold with respect to our metrics and to do so, we compute a score by using the following formulae. The idea is to take the inverse  of the norm 2 of $\texttt{t_best}$ coordinates in the space of ou metrics: $\|(x,y,z)\|^2 = \sqrt{x^2 + y^2 + z^2}$. 
+When we find this $\texttt{t_best}$ value, we still need to quantify how good this threshold is with respect to our metrics. To do so, we compute a score by using the following formulae. The idea is to take the inverse  of the norm 2 of $\texttt{t_best}$ coordinates in the space of ou metrics: $\|(x,y,z)\|^2 = \sqrt{x^2 + y^2 + z^2}$. 
 
 We know that if this distance is low, we have good metrics (FA are low and Delay also) and so our score needs to be high. That's why we take the inverse of this norm. With $x = w_1 * FA$, $y = w_2 * D$, $z = w_3 * 1/P$ we have:
 $$
@@ -409,7 +409,7 @@ The following tables show the metrics that we get by using the best threshold fo
 
 This project allowed me to discover how machine learning can be applied to epileptic seizure detection and how feature selection is important in order to get good metrics for classification.
 
-One of my main contribution to this project was to propose a systematic way of quantifiying how good is a feature for a given patient with respect to the metrics are considered to be relevant for our problem (False alarms, Delay and precision). By finding a way to score features, I was able to show that some of them might perform better on one patient or another.
+One of my main contribution to this project was to propose a systematic way of quantifiying how good is a feature for a given patient with respect to the metrics that we considered to be relevant for this specific problem (False alarms, Delay and precision). By finding a way to score features, I was able to show that some of them might perform better on one patient or another.
 
 The next steps for this study would be
 
